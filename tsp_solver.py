@@ -1,3 +1,7 @@
+# Vandita Lodha and Suhani Jain
+# SMAI Assignment 2
+
+# imports
 import functools
 import itertools
 import random
@@ -6,132 +10,160 @@ import matplotlib.pyplot as plt
 from collections import Counter
 from typing import List, Tuple
 
-City = complex  # e.g. City(300, 100)
-Cities = frozenset  # A set of cities
-Tour = List[City]  # A list of cities visited, in order
+random.seed(0) # to ensure randomisation is consistent between runs
+
+City = complex  # A city is represented as a complex number (x, y coordinates).
+Cities = frozenset  # A set of cities.
+Tour = List[City]  # A list of cities visited in a specific order.
 
 def distance(A: City, B: City) -> float:
-    "Distance between two cities"
+    "Compute the Euclidean distance between two cities."
     return abs(A - B)
 
 def tour_length(tour: Tour) -> float:
-    "The total distances of each link in the tour, including the link from last back to first."
+    """Calculate the total distance of a tour.
+IMP, GET THIS CHECKED: Includes the distance from the last city back to the first one."""
     return sum(distance(tour[i], tour[i - 1]) for i in range(len(tour)))
 
 def valid_tour(tour: Tour, cities: Cities) -> bool:
-    "Does `tour` visit every city in `cities` exactly once?"
+    """Check if a given tour visits every city exactly once."""
     return Counter(tour) == Counter(cities)
 
 def nearest_neighbor(A: City, cities) -> City:
-    """Find the city C in cities that is nearest to city A."""
+    """Find the nearest city to a given city A from a set of unvisited cities."""
     return min(cities, key=lambda C: distance(C, A))
 
 def nearest_tsp(cities, start=None) -> Tour:
-    """Create a partial tour that initially is just the start city."""
-    start = start or next(iter(cities))
+    """Generate a tour using the nearest neighbour heuristic.
+    Start at a specified city (or randomly if none is provided), 
+    and repeatedly visit the nearest unvisited city."""
+# ASK: Is start city defined?
+    start = start or next(iter(cities))  # If no start city provided, pick one randomly.
     tour = [start]
-    unvisited = set(cities) - {start}
+    unvisited = set(cities) - {start}  # Set of cities yet to be visited.
     
     while unvisited:
         nearest = nearest_neighbor(tour[-1], unvisited)
-        tour.append(nearest)
+        tour.append(nearest) 
         unvisited.remove(nearest)
     
     return tour
 
 @functools.lru_cache(None)
 def subsegments(N):
+    """Generate all possible subsegments of a tour.
+    Used for optimizing the tour by swapping segments."""
     return tuple((i, i + length)
                  for length in reversed(range(2, N - 1))
                  for i in range(N - length))
 
 def opt2(tour) -> Tour:
-    "Perform 2-opt segment reversals to optimize tour."
+    """Apply 2-opt optimization: Try reversing any two edges in the tour to find a shorter tour.
+    Continues until no more improvements are possible."""
     changed = True
     while changed:
         changed = False
-        for (i, j) in subsegments(len(tour)):
-            if reversal_is_improvement(tour, i, j):
-                tour[i:j] = reversed(tour[i:j])
-                changed = True
+        for (i, j) in subsegments(len(tour)):  # Check all subsegments of the tour.
+            if reversal_is_improvement(tour, i, j):  # If reversing the segment improves the tour.
+                tour[i:j] = reversed(tour[i:j])  # Reverse the segment.
+                changed = True  # Mark that a change has been made.
     return tour
 
 def reversal_is_improvement(tour, i, j) -> bool:
-    "Would reversing the segment `tour[i:j]` make the tour shorter?"
+    """Determine if reversing the segment between i and j will shorten the tour."""
     A, B, C, D = tour[i-1], tour[i], tour[j-1], tour[j % len(tour)]
+    # Check if swapping would reduce the distance.
     return distance(A, B) + distance(C, D) > distance(A, C) + distance(B, D)
 
 def rep_opt2_nearest_tsp(cities, k=10) -> Tour:
-    """Apply 2-opt to *each* of the repeated nearest neighbors tours."""
+    """Repeatedly apply 2-opt to the tours generated from the nearest neighbor heuristic.
+    Tries k different starting cities."""
     return min((opt2(nearest_tsp(cities, start)) for start in random.sample(list(cities), min(k, len(cities)))),
                key=tour_length)
 
 def brute_force_tsp(cities: List[City]) -> Tour:
-    """Find the optimal tour using brute force by checking all permutations."""
+    """Find the optimal tour by brute force.
+    Check all possible permutations of the cities and return the one with the shortest distance."""
     best_tour = None
-    best_length = float('inf')
+    best_length = float('inf')  # Initialize best length to a very large number.
     
+    # Check every possible permutation of cities.
     for perm in itertools.permutations(cities):
-        current_length = tour_length(perm)
-        if current_length < best_length:
+        current_length = tour_length(perm)  # Calculate the length of the current permutation.
+        if current_length < best_length:  # If the current tour is shorter than the best found so far.
             best_length = current_length
-            best_tour = perm
+            best_tour = perm  # Update the best tour.
             
     return best_tour
 
 def plot_tour(tour: Tour):
+    """Plot the given tour using matplotlib.
+    The starting city is marked in red, and the remaining cities are marked in blue."""
     plt.figure(figsize=(8, 6))
-    X = [city.real for city in tour + [tour[0]]]
-    Y = [city.imag for city in tour + [tour[0]]]
-    plt.plot(X, Y, 'bo-')
+    X = [city.real for city in tour + [tour[0]]]  # Extract the real (x) coordinates.
+    Y = [city.imag for city in tour + [tour[0]]]  # Extract the imaginary (y) coordinates.
+    
+    plt.plot(X, Y, 'bo-', label="Tour Path")  # Plot the tour with blue dots connected by lines.
+    
+    # Highlight the starting city (first city in the tour) in red
+    plt.plot(tour[0].real, tour[0].imag, 'ro', markersize=10, label="Starting Point")  # Red dot for the start.
+    
     plt.title('Optimal Tour Path')
-    plt.axis('equal')
-    plt.axis('off')
+    plt.axis('equal')  # Ensure equal scaling for both axes.
+    plt.axis('off')  # Turn off the axes.
+    plt.legend()  # Add a legend to differentiate the start point.
     plt.show()
 
 def read_input():
-    tsp_type = input().strip()  # Read TSP type (EUCLIDEAN or NON-EUCLIDEAN)
-    n = int(input())  # Read number of cities
+    """Read input for the problem: TSP type, number of cities, and city coordinates.
+    Also read the distance matrix if needed (for non-Euclidean TSP)."""
+    tsp_type = input().strip()  # Read TSP type (EUCLIDEAN or NON-EUCLIDEAN).
+    n = int(input())  # Read number of cities.
     cities = []
     
+    # Read city coordinates.
     for _ in range(n):
         x, y = map(float, input().split())
-        cities.append(complex(x, y))  # Store coordinates as complex numbers
+        cities.append(complex(x, y))  # Store coordinates as complex numbers.
     
     distances = []
     
+    # Read the distance matrix for non-Euclidean TSP.
     for _ in range(n):
-        distances.append(list(map(float, input().split())))  # Read distance matrix
+        distances.append(list(map(float, input().split())))
     
     return tsp_type, cities, distances
 
 def main():
-    tsp_type, cities, distances = read_input()
+    tsp_type, cities, distances = read_input()  # Read the input from the user.
     
-    start_time = time.perf_counter()  # Start timing for nearest neighbor + 2-opt
-    best_tour_heuristic = rep_opt2_nearest_tsp(frozenset(cities))  # Find best tour using heuristic
-    end_time_heuristic = time.perf_counter()  # End timing
+    start_time = time.perf_counter()  # Start timing.
+    best_tour_heuristic = rep_opt2_nearest_tsp(frozenset(cities))
+    end_time_heuristic = time.perf_counter()  # End timing.
     
-    best_length_heuristic = tour_length(best_tour_heuristic)  # Calculate length of best heuristic tour
+    best_length_heuristic = tour_length(best_tour_heuristic)  # Calculate the total length of the heuristic tour.
     
-    print(f"Best Tour (Heuristic): {' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")  # Output path representation
-    print(f"Cost of Shortest Route (Heuristic): {best_length_heuristic:.2f}")  # Output cost of shortest route (heuristic)
+    # Print the results for the heuristic approach.
+    print(f"Best Tour (Heuristic): {' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")  # Print the path.
+    print(f"Cost of Shortest Route (Heuristic): {best_length_heuristic:.2f}")  # Print the cost (length of the tour).
 
-    print(f"Time Taken (Heuristic): {end_time_heuristic - start_time:.4f} seconds")  # Output time taken for heuristic
-    
-    plot_tour(best_tour_heuristic)  # Plot the path from heuristic solution
+    print(f"Time Taken (Heuristic): {end_time_heuristic - start_time:.4f} seconds")  # Print the time taken.
 
-    # Brute force solution
-    start_time_brute_force = time.perf_counter()  # Start timing for brute force
-    best_tour_brute_force = brute_force_tsp(cities)  # Find best tour using brute force
-    end_time_brute_force = time.perf_counter()  # End timing
+    plot_tour(best_tour_heuristic)  # Plot the tour generated by the heuristic.
     
-    best_length_brute_force = tour_length(best_tour_brute_force)  # Calculate length of best brute force tour
+    # Uncomment the following section to use brute force (only feasible for small n).
+    '''
+    start_time_brute_force = time.perf_counter()  # Start timing.
+    best_tour_brute_force = brute_force_tsp(cities)
+    end_time_brute_force = time.perf_counter()  # End timing.
     
-    print(f"Best Tour (Brute Force): {' '.join(str(cities.index(city)) for city in best_tour_brute_force)}")  # Output path representation
-    print(f"Cost of Shortest Route (Brute Force): {best_length_brute_force:.2f}")  # Output cost of shortest route (brute force)
+    best_length_brute_force = tour_length(best_tour_brute_force)
     
-    print(f"Time Taken (Brute Force): {end_time_brute_force - start_time_brute_force:.4f} seconds")  # Output time taken for brute force
+    print(f"Best Tour (Brute Force): {' '.join(str(cities.index(city)) for city in best_tour_brute_force)}")
+    print(f"Cost of Shortest Route (Brute Force): {best_length_brute_force:.2f}")
+    
+    print(f"Time Taken (Brute Force): {end_time_brute_force - start_time_brute_force:.4f} seconds")
+    '''
 
 
 if __name__ == "__main__":
