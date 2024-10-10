@@ -8,4 +8,10 @@ syntax: ./run.sh < input_file.txt
 do chmod +x run.sh before prev command for 1st time
 
 
-NOTE: comment brute force lines for filesize >10, or you will be waiting for a while
+
+updates:
+SA uses simulated annealing for noneuc, problematic for 100+
+
+HC is harccoded, uses euc logic for both, my brain is at the end of its wits, if you can figure a soln, then cool else ig fuck it
+
+
