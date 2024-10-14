@@ -154,9 +154,7 @@ def main():
     #print(f"Tour_without opt: {' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")
     print(f"Cost of Route_without opt: {best_length:.2f}")
 
-
     #plot_tour(best_tour_heuristic)
-    
 
 if __name__ == "__main__":
     main()  # Run the main function if the script is executed
