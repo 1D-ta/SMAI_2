@@ -152,7 +152,7 @@ def main():
     
     #print without opt
     #print(f"Tour_without opt: {' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")
-    print(f"Cost of Route_without opt: {best_length:.2f}")
+    print(f"Cost of Route_without opt: {length:.2f}")
 
     #plot_tour(best_tour_heuristic)
 
