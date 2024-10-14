@@ -5,14 +5,14 @@ import random
 import time
 import numpy as np
 from typing import List, Tuple
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import itertools
 
 City = complex  # Represent city coordinates as complex numbers
 Cities = frozenset  # A set of cities
 Tour = List[City]  # A list of cities visited in order
 
-random.seed(0)  # Ensure consistency across runs
+random.seed(42)  # Ensure consistency across runs
 
 # Global dictionary to map city coordinates to indices
 city_to_index = {}
@@ -65,7 +65,7 @@ def reversal_is_improvement(tour: Tour, i: int, j: int) -> bool:
     A, B, C, D = tour[i-1], tour[i], tour[j-1], tour[j % len(tour)]
     return distance(A, B) + distance(C, D) > distance(A, C) + distance(B, D)
 
-def rep_opt2_nearest_tsp(cities: Cities, k=10) -> Tour:
+def rep_opt2_nearest_tsp(cities: Cities, k=200) -> Tour:
     """Apply nearest neighbor with 2-opt optimization over multiple initializations."""
     return min((opt2(nearest_tsp(cities, start)) for start in random.sample(list(cities), min(k, len(cities)))), 
                key=tour_length)
@@ -82,6 +82,7 @@ def read_input():
     distances = [list(map(float, input().split())) for _ in range(n)]
     return tsp_type, cities, distances
 
+'''
 def plot_tour(tour: Tour):
     """Plot the cities and the tour path."""
     x = [city.real for city in tour]  # Extract real parts (x-coordinates)
@@ -102,6 +103,7 @@ def plot_tour(tour: Tour):
     plt.grid()
     plt.axis('equal')  # Equal scaling for both axes
     plt.show()
+'''
 
 def brute_force(DISTANCE_MATRIX):
     """Brute-force search to find the optimal tour using the distance matrix and print in terms of city indices."""
@@ -153,7 +155,7 @@ def main():
     print(f"Cost of Route_without opt: {best_length:.2f}")
 
 
-    plot_tour(best_tour_heuristic)
+    #plot_tour(best_tour_heuristic)
     
 
 if __name__ == "__main__":

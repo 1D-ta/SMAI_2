@@ -62,7 +62,7 @@ def reversal_is_improvement(tour: Tour, i: int, j: int) -> bool:
     A, B, C, D = tour[i-1], tour[i], tour[j-1], tour[j % len(tour)]  # Identify the four cities involved in the reversal
     return distance(A, B) + distance(C, D) > distance(A, C) + distance(B, D)  # Check if the reversal shortens the tour
 
-def rep_opt2_nearest_tsp(cities: Cities, k=10) -> Tour:
+def rep_opt2_nearest_tsp(cities: Cities, k=200) -> Tour:
     """Apply nearest neighbor with 2-opt optimization over multiple initializations."""
     # Perform nearest neighbor heuristic starting from k random cities, optimize with 2-opt, return the best tour
     return min((opt2(nearest_tsp(cities, start)) for start in random.sample(list(cities), min(k, len(cities)))), 
@@ -89,13 +89,13 @@ def main():
     end_time = time.perf_counter()  # End timer for performance measurement
     
     # Output the results
-    '''
+    
     print(f"Tour: {' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")
     print(f"Cost of Route: {best_length:.2f}")
     print(f"Time Taken: {end_time - start_time:.4f} seconds")
-    '''
+    
 
-    print(f"{' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")
+    #print(f"{' '.join(str(cities.index(city)) for city in best_tour_heuristic)}")
 
 
 if __name__ == "__main__":
