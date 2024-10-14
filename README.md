@@ -7,11 +7,7 @@ syntax: ./run.sh < input_file.txt
 
 do chmod +x run.sh before prev command for 1st time
 
+tsp_solver and run.sh are the files to be submitted
 
 
-updates:
-SA uses simulated annealing for noneuc, problematic for 100+
-
-HC is harccoded, uses euc logic for both, my brain is at the end of its wits, if you can figure a soln, then cool else ig fuck it
-
-
+do not change these files at all, ask before changes.
