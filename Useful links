@@ -1,4 +1,0 @@
-Stack exchange comparing the best heuristics: https://or.stackexchange.com/questions/6764/is-there-a-ranking-of-heuristics-for-the-travelling-salesman-problem
-Things to explore : simulated annealing, ant colony optimization, randomized local searches
-DP : https://www.geeksforgeeks.org/travelling-salesman-problem-using-dynamic-programming/
-MST : https://www.geeksforgeeks.org/approximate-solution-for-travelling-salesman-problem-using-mst/
